@@ -1,0 +1,36 @@
+[{
+  "_id": {
+    "$oid": "67d843d5eae94de502d8731a"
+  },
+  "user_id": "67d843d5eae94de502d87318",
+  "btc": 5,
+  "eth": 0,
+  "xrp": 0,
+  "doge": 0,
+  "usdt": 0,
+  "createdAt": {
+    "$date": "2025-03-17T15:46:29.502Z"
+  },
+  "updatedAt": {
+    "$date": "2025-03-17T16:32:07.757Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67d8464fea8b6fced21e2e9f"
+  },
+  "user_id": "67d8464fea8b6fced21e2e9d",
+  "btc": 4880,
+  "eth": 5000,
+  "xrp": 5000,
+  "doge": 5000,
+  "usdt": 5000,
+  "createdAt": {
+    "$date": "2025-03-17T15:57:03.244Z"
+  },
+  "updatedAt": {
+    "$date": "2025-03-17T15:57:21.897Z"
+  },
+  "__v": 0
+}]

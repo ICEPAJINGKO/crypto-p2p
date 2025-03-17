@@ -1,0 +1,16 @@
+[{
+  "_id": {
+    "$oid": "67d84661ea8b6fced21e2ea5"
+  },
+  "wallet_id": "67d8464fea8b6fced21e2e9f",
+  "currency": "btc",
+  "amount": 70,
+  "price": 50,
+  "createdAt": {
+    "$date": "2025-03-17T15:57:21.904Z"
+  },
+  "updatedAt": {
+    "$date": "2025-03-17T16:29:45.782Z"
+  },
+  "__v": 0
+}]

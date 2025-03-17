@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class P2pDto {
     @IsNotEmpty()
@@ -7,6 +7,7 @@ export class P2pDto {
 
     @IsNotEmpty()
     @IsString()
+    @IsIn(['btc', 'eth', 'xrp', 'doge', 'usdt'])
     readonly currency: string;
 
     @IsNotEmpty()
@@ -21,15 +22,15 @@ export class P2pDto {
 export class OrderP2pDto {
     @IsNotEmpty()
     @IsString()
-    readonly walletId: string;
-
-    @IsNotEmpty()
-    @IsString()
-    readonly currency: string;
+    readonly p2pId: string;
 
     @IsNotEmpty()
     @IsNumber()
     readonly amount: number;
+
+    @IsNotEmpty()
+    @IsString()
+    readonly buyerWalletId: string;
 }
 
 export class ApproveOrderP2pDto {

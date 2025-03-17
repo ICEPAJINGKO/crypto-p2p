@@ -1,8 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { P2p } from './schema/p2p.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { ApproveOrderP2pDto, OrderP2pDto, P2pDto } from './dto/p2p.dto';
+import {
+    ApproveOrderP2pDto,
+    CancelOrderP2pDto,
+    OrderP2pDto,
+    P2pDto,
+} from './dto/p2p.dto';
 import { P2pTransaction } from './schema/p2p-transaction.schema';
 import { WalletService } from '../wallet/wallet.service';
 
@@ -10,8 +15,7 @@ import { WalletService } from '../wallet/wallet.service';
 export class P2pService {
     constructor(
         @InjectModel(P2p.name) private p2pModel: Model<P2p>,
-        @InjectModel(P2p.name)
-        private p2pTransactionModel: Model<P2pTransaction>,
+        @InjectModel(P2pTransaction.name) private p2pTransactionModel: Model<P2pTransaction>,
         private walletService: WalletService,
     ) {
         console.log('P2p Service created');
@@ -32,14 +36,28 @@ export class P2pService {
             };
         }
 
-        const p2p = new this.p2pModel(data);
-        p2p.save();
-
-        await this.walletService.subtractCurrencyFromWallet(
+        const sub = await this.walletService.subtractCurrencyFromWallet(
             data.walletId,
             data.currency,
             data.amount,
         );
+
+        if (sub.isError) {
+            return {
+                isError: true,
+                message: sub.message,
+            };
+        }
+
+        const dataToSave = {
+            wallet_id: data.walletId,
+            currency: data.currency,
+            amount: data.amount,
+            price: data.price,
+        };
+
+        const p2p = new this.p2pModel(dataToSave);
+        await p2p.save();
 
         return {
             isError: false,
@@ -49,7 +67,7 @@ export class P2pService {
 
     async orderP2p(data: OrderP2pDto): Promise<any> {
         const findP2p = await this.p2pModel
-            .findOne({ wallet_id: data.walletId, currency: data.currency })
+            .findOne({ _id: new Types.ObjectId(data.p2pId) })
             .lean()
             .exec();
 
@@ -68,15 +86,15 @@ export class P2pService {
         }
 
         await this.p2pModel.updateOne(
-            { wallet_id: data.walletId, currency: data.currency },
+            { _id: new Types.ObjectId(data.p2pId) },
             { $inc: { amount: -data.amount } },
         );
 
         await this.p2pTransactionModel.create({
-            p2p_id: findP2p._id,
+            p2p_id: String(findP2p._id),
             amount: data.amount,
-            price: findP2p.price,
             status: 'pending',
+            buyer_wallet_id: data.buyerWalletId,
         });
 
         return {
@@ -87,7 +105,7 @@ export class P2pService {
 
     async approveP2p(data: ApproveOrderP2pDto): Promise<any> {
         const findP2pTransaction = await this.p2pTransactionModel
-            .findOne({ _id: data.p2pTransactionId, status: 'pending' })
+            .findOne({ _id: new Types.ObjectId(data.p2pTransactionId), status: 'pending' })
             .lean()
             .exec();
 
@@ -103,15 +121,33 @@ export class P2pService {
             { status: 'approved' },
         );
 
+        const findP2p = await this.p2pModel
+            .findOne({ _id: new Types.ObjectId(findP2pTransaction.p2p_id) })
+            .lean()
+            .exec();
+
+        if (!findP2p) {
+            return {
+                isError: true,
+                message: 'This currency does not exist',
+            };
+        }
+
+        await this.walletService.addCurrencyToWallet(
+            findP2pTransaction.buyer_wallet_id,
+            findP2p.currency,
+            findP2pTransaction.amount,
+        );
+
         return {
             isError: false,
             message: 'Approve success',
         };
     }
 
-    async cancelP2p(data: ApproveOrderP2pDto): Promise<any> {
+    async cancelP2p(data: CancelOrderP2pDto): Promise<any> {
         const findP2pTransaction = await this.p2pTransactionModel
-            .findOne({ _id: data.p2pTransactionId, status: 'pending' })
+            .findOne({ _id: new Types.ObjectId(data.p2pTransactionId), status: 'pending' })
             .lean()
             .exec();
 

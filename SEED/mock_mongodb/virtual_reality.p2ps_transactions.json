@@ -1,0 +1,16 @@
+[{
+  "_id": {
+    "$oid": "67d84df98b9e8dd8a667858b"
+  },
+  "p2p_id": "67d84661ea8b6fced21e2ea5",
+  "amount": 5,
+  "status": "approved",
+  "buyer_wallet_id": "67d843d5eae94de502d8731a",
+  "createdAt": {
+    "$date": "2025-03-17T16:29:45.790Z"
+  },
+  "updatedAt": {
+    "$date": "2025-03-17T16:32:07.751Z"
+  },
+  "__v": 0
+}]

@@ -9,11 +9,11 @@ export class P2pTransaction extends Document {
     @Prop({ required: true, min: 0 })
     amount: number;
 
-    @Prop({ required: true, min: 0 })
-    price: number;
-
     @Prop({ required: true })
     status: string;
+
+    @Prop({ required: true })
+    buyer_wallet_id: string;
 }
 
 export const P2pTransactionSchema =

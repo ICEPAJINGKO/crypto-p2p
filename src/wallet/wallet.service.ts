@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ICreateWallet } from './wallet.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import { Wallet } from './schema/wallet.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class WalletService {
@@ -30,8 +30,15 @@ export class WalletService {
         }
     }
 
-    async addCurrencyToWallet(walletId: string, currency: string, amount: number): Promise<Record<string, any>> {
-        const wallet = await this.walletModel.findOne({ wallet_id: walletId }).lean().exec();
+    async addCurrencyToWallet(
+        walletId: string,
+        currency: string,
+        amount: number,
+    ): Promise<Record<string, any>> {
+        const wallet = await this.walletModel
+            .findOne({ _id: new Types.ObjectId(walletId) })
+            .lean()
+            .exec();
 
         if (!wallet) {
             return {
@@ -43,7 +50,7 @@ export class WalletService {
 
         // +เพิ่มจำนวนเงินในกระเป๋า
         const updated = await this.walletModel.updateOne(
-            { wallet_id: walletId },
+            { _id: new Types.ObjectId(walletId) },
             { $inc: { [currency]: amount } },
         );
 
@@ -59,12 +66,20 @@ export class WalletService {
                 message: 'Failed to add currency',
                 data: null,
             };
-        };
-
+        }
     }
 
-    async subtractCurrencyFromWallet(walletId: string, currency: string, amount: number): Promise<Record<string, any>> {
-        const wallet = await this.walletModel.findOne({ wallet_id: walletId }).lean().exec();
+    async subtractCurrencyFromWallet(
+        walletId: string,
+        currency: string,
+        amount: number,
+    ): Promise<Record<string, any>> {
+        const wallet = await this.walletModel
+            .findOne({ _id: new Types.ObjectId(walletId) })
+            .lean()
+            .exec();
+
+        console.log("=============> wallet :", wallet);
 
         if (!wallet) {
             return {
@@ -74,9 +89,17 @@ export class WalletService {
             };
         }
 
+        if (wallet[currency] < amount) {
+            return {
+                isError: true,
+                message: 'Not enough currency',
+                data: null,
+            };
+        }
+
         // -ลดจำนวนเงินในกระเป๋า
         const updated = await this.walletModel.updateOne(
-            { wallet_id: walletId },
+            { _id: new Types.ObjectId(walletId) },
             { $inc: { [currency]: -amount } },
         );
 
@@ -92,6 +115,6 @@ export class WalletService {
                 message: 'Failed to subtract currency',
                 data: null,
             };
-        };
+        }
     }
 }
