@@ -17,16 +17,81 @@ export class WalletService {
 
         if (saved) {
             return {
-                isSuccess: true,
+                isError: false,
                 message: 'Wallet created successfully',
                 data: saved,
             };
         } else {
             return {
-                isSuccess: false,
+                isError: true,
                 message: 'Failed to create wallet',
                 data: null,
             };
         }
+    }
+
+    async addCurrencyToWallet(walletId: string, currency: string, amount: number): Promise<Record<string, any>> {
+        const wallet = await this.walletModel.findOne({ wallet_id: walletId }).lean().exec();
+
+        if (!wallet) {
+            return {
+                isError: true,
+                message: 'Wallet not found',
+                data: null,
+            };
+        }
+
+        // +เพิ่มจำนวนเงินในกระเป๋า
+        const updated = await this.walletModel.updateOne(
+            { wallet_id: walletId },
+            { $inc: { [currency]: amount } },
+        );
+
+        if (updated) {
+            return {
+                isError: false,
+                message: 'Currency added successfully',
+                data: updated,
+            };
+        } else {
+            return {
+                isError: true,
+                message: 'Failed to add currency',
+                data: null,
+            };
+        };
+
+    }
+
+    async subtractCurrencyFromWallet(walletId: string, currency: string, amount: number): Promise<Record<string, any>> {
+        const wallet = await this.walletModel.findOne({ wallet_id: walletId }).lean().exec();
+
+        if (!wallet) {
+            return {
+                isError: true,
+                message: 'Wallet not found',
+                data: null,
+            };
+        }
+
+        // -ลดจำนวนเงินในกระเป๋า
+        const updated = await this.walletModel.updateOne(
+            { wallet_id: walletId },
+            { $inc: { [currency]: -amount } },
+        );
+
+        if (updated) {
+            return {
+                isError: false,
+                message: 'Currency subtracted successfully',
+                data: updated,
+            };
+        } else {
+            return {
+                isError: true,
+                message: 'Failed to subtract currency',
+                data: null,
+            };
+        };
     }
 }

@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { WalletModule } from './wallet/wallet.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { P2pModule } from './p2p/p2p.module';
 
 @Module({
     imports: [
@@ -19,6 +20,7 @@ import { MongooseModule } from '@nestjs/mongoose';
         }),
         UserModule,
         WalletModule,
+        P2pModule,
     ],
     controllers: [AppController],
     providers: [AppService],
